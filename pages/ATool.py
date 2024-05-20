@@ -142,7 +142,7 @@ layout = dbc.Container([
     
     
     dcc.Location(id="ATool"),
-    html.H1(children='Allocation Tool/ UpTime-izer'),
+    html.H1(children='ATool'),
     html.Hr(),
 
 
