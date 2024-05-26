@@ -15,20 +15,20 @@ from botocore.exceptions import ClientError
 import requests 
 
 
-session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+session=boto3.Session(aws_access_key_id = os.environ["ACCESS_KEY"], aws_secret_access_key = os.environ["SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
 
 
 UPLOAD_FOLDER_ROOT = "/usr/src/app/uploads" #os.path.join(os.path.dirname(__file__),"uploads")
 #Get all Files in the S3 Bucket
-upload_bucket_name="map-plotly-dash"
-download_bucket_name="silen-lambda-test"
+upload_bucket_name=os.environ["MAP_S3_UPLOAD"] #"map-plotly-dash"
+download_bucket_name=os.environ["MAP_S3_DOWNLOAD"] #"silen-lambda-test"
 
 filesUploadBucket=[]
 filesInDownloadBucket=[]
 listOfFolders=[]
 def get_filesinBucket(bucket_name):
     filesInBucket=[]
-    session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+    session=boto3.Session(aws_access_key_id = os.environ["ACCESS_KEY"], aws_secret_access_key = os.environ["SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
     
     s3 = session.resource('s3')
     my_bucket = s3.Bucket(bucket_name)
@@ -82,7 +82,7 @@ def upload_fileToS3(file_name, bucket_name, object_name=None):
     #print(file_name)
     #print(bucket_name)
     # Upload the file
-    session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+    session=boto3.Session(aws_access_key_id = os.environ["ACCESS_KEY"], aws_secret_access_key = os.environ["SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
     s3_client = session.client('s3')
     try:
         response = s3_client.upload_file(file_name, bucket_name, object_name)
@@ -99,7 +99,7 @@ def invoke_lambda(bucket, file_key):
     """
     
     # Set Lambda Client with credentials
-    session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+    session=boto3.Session(aws_access_key_id = os.environ["ACCESS_KEY"], aws_secret_access_key = os.environ["SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
     client = session.client('lambda')
 
     # Dictionary to be posted on the lambda event with information provided
@@ -128,7 +128,7 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
     print(bucket_name)
     print(type(object_name))
     # Generate a presigned URL for the S3 object
-    session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+    session=boto3.Session(aws_access_key_id = os.environ["ACCESS_KEY"], aws_secret_access_key = os.environ["SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
     s3_client = session.client('s3')
     try:
         response = s3_client.generate_presigned_url('get_object',
