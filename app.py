@@ -7,7 +7,13 @@ import dash_uploader as du
 import os 
 import ast
 # Keep this out of source code repository - save in a file or a database
-session = boto3.Session()
+#secretparser=configparser.ConfigParser()
+#secretparser.read('confi.ini')
+session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+
+
+
+#session = boto3.Session()
 ssm = session.client('ssm')
 PlotlyDashOAuth = ssm.get_parameter(Name='PlotlyDashOAuth', WithDecryption=False)
 PWPAIR = ast.literal_eval(PlotlyDashOAuth['Parameter']['Value'])

@@ -15,7 +15,10 @@ from botocore.exceptions import ClientError
 import requests 
 
 
-UPLOAD_FOLDER_ROOT = "/home/ec2-user/environment/uploads" #os.path.join(os.path.dirname(__file__),"uploads")
+session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+
+
+UPLOAD_FOLDER_ROOT = "/usr/src/app/uploads" #os.path.join(os.path.dirname(__file__),"uploads")
 #Get all Files in the S3 Bucket
 upload_bucket_name="map-plotly-dash"
 download_bucket_name="silen-lambda-test"
@@ -25,14 +28,18 @@ filesInDownloadBucket=[]
 listOfFolders=[]
 def get_filesinBucket(bucket_name):
     filesInBucket=[]
-    conn = client('s3')  # again assumes boto.cfg setup, assume AWS S3
-    for key in conn.list_objects(Bucket=bucket_name)['Contents']:
-        filesInBucket.append(key['Key'])
-        #print(key['Key'])
+    session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+    
+    s3 = session.resource('s3')
+    my_bucket = s3.Bucket(bucket_name)
+
+    for my_bucket_object in my_bucket.objects.all():
+        filesInBucket.append(my_bucket_object.key)
     return filesInBucket
 #get_filesinBucket()
 filesUploadBucket=get_filesinBucket(upload_bucket_name)
 filesInDownloadBucket=get_filesinBucket(download_bucket_name)
+
 def get_filePathForUploadToS3():
     filePathForUploadToS3=[]
     for root, dirs, files in os.walk(UPLOAD_FOLDER_ROOT, topdown=False):
@@ -75,7 +82,8 @@ def upload_fileToS3(file_name, bucket_name, object_name=None):
     #print(file_name)
     #print(bucket_name)
     # Upload the file
-    s3_client = boto3.client('s3')
+    session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+    s3_client = session.client('s3')
     try:
         response = s3_client.upload_file(file_name, bucket_name, object_name)
     except ClientError as e:
@@ -91,7 +99,8 @@ def invoke_lambda(bucket, file_key):
     """
     
     # Set Lambda Client with credentials
-    client = boto3.client('lambda')
+    session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+    client = session.client('lambda')
 
     # Dictionary to be posted on the lambda event with information provided
     # by the user command line call
@@ -119,7 +128,8 @@ def create_presigned_url(bucket_name, object_name, expiration=3600):
     print(bucket_name)
     print(type(object_name))
     # Generate a presigned URL for the S3 object
-    s3_client = boto3.client('s3')
+    session=boto3.Session(aws_access_key_id = os.environ["AWS_ACCESS_KEY"], aws_secret_access_key = os.environ["AWS_SECRET_ACCESS_KEY"], region_name = os.environ["REGION_NAME"])
+    s3_client = session.client('s3')
     try:
         response = s3_client.generate_presigned_url('get_object',
                                                     Params={'Bucket': bucket_name,
@@ -270,7 +280,7 @@ def execute_dmc(button, ChosenFile):
 
     print("Hello5")
     #invoke_lambda(UPLOAD_FOLDER_ROOT, ChosenFile)
-    print(invoke_lambda(UPLOAD_FOLDER_ROOT, ChosenFile)['Payload'].read())
+    print(invoke_lambda(upload_bucket_name, ChosenFile)['Payload'].read())
     return ChosenFile   
 
 
